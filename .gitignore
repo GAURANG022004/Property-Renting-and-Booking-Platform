@@ -1,0 +1,40 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# Java/Maven
+**/target/
+
+# Build output
+**/dist/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Backend generated uploads
+**/uploads/
+
+# Temporary files
+*.tmp
+*.temp
