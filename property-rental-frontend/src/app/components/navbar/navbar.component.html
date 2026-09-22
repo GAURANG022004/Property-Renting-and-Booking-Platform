@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <div class="brand">
+    <a routerLink="/" class="brand-link">PropertyRenting</a>
+  </div>
+
+  <div class="links">
+    <a routerLink="/" routerLinkActive="active">Properties</a>
+    <a *ngIf="hasRole('TENANT')" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a *ngIf="hasRole('TENANT')" routerLink="/my-bookings" routerLinkActive="active">My Bookings</a>
+    <a *ngIf="hasRole('OWNER')" routerLink="/owner" routerLinkActive="active">Owner workspace</a>
+    <a *ngIf="hasRole('OWNER')" routerLink="/owner/add-property" routerLinkActive="active">Add Property</a>
+    <a *ngIf="hasRole('ADMIN')" routerLink="/admin" routerLinkActive="active">Admin workspace</a>
+    <a *ngIf="!tokenService.isLoggedIn()" routerLink="/login" routerLinkActive="active">Login</a>
+    <a *ngIf="!tokenService.isLoggedIn()" routerLink="/register" routerLinkActive="active">Register</a>
+    <a *ngIf="tokenService.isLoggedIn()" routerLink="/login" (click)="logout()">Logout</a>
+  </div>
+</nav>
