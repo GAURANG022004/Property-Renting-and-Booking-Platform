@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Booking } from './booking.service';
 import { Property } from './property.service';
+import { environment } from '../../environments/environment';
 
 export type OwnerDashboard = { totalProperties: number; activeProperties: number; pendingProperties: number; pendingBookingRequests: number; acceptedBookings: number; completedStays: number; estimatedEarnings: number };
 export type AvailabilityBlock = { id: number; propertyId: number; startDate: string; endDate: string; reason: string };
 @Injectable({ providedIn: 'root' })
 export class OwnerService {
-  private readonly base = 'http://localhost:8080/owner';
+  private readonly base = `${environment.apiBaseUrl}/owner`;
   constructor(private http: HttpClient) {}
   dashboard(): Observable<OwnerDashboard> { return this.http.get<OwnerDashboard>(`${this.base}/dashboard`); }
   properties(): Observable<Property[]> { return this.http.get<Property[]>(`${this.base}/properties`); }
