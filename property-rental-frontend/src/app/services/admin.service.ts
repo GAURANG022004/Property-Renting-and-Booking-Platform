@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Booking } from './booking.service';
 import { Property } from './property.service';
+import { environment } from '../../environments/environment';
 
 export type AdminDashboard = { totalUsers: number; activeUsers: number; totalOwners: number; totalProperties: number; pendingProperties: number; totalBookings: number; cancelledBookings: number; openComplaints: number };
 export type AdminUser = { id: number; firstName: string; lastName: string; email: string; phoneNumber: string; roles: string[]; active: boolean };
@@ -12,7 +13,7 @@ export type Setting = { key: string; value: string };
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private readonly base = 'http://localhost:8080/admin';
+  private readonly base = `${environment.apiBaseUrl}/admin`;
   constructor(private http: HttpClient) {}
   dashboard(): Observable<AdminDashboard> { return this.http.get<AdminDashboard>(`${this.base}/dashboard`); }
   users(): Observable<AdminUser[]> { return this.http.get<AdminUser[]>(`${this.base}/users`); }
