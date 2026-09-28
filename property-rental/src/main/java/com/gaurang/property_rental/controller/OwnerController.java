@@ -16,8 +16,16 @@ public class OwnerController {
     private final OwnerService ownerService;
     public OwnerController(OwnerService ownerService) { this.ownerService = ownerService; }
 
-    @GetMapping("/dashboard") public OwnerDashboardResponse dashboard() { return ownerService.dashboard(email()); }
-    @GetMapping("/properties") public List<PropertyResponse> properties() { return ownerService.properties(email()); }
+    @GetMapping("/dashboard") 
+    public OwnerDashboardResponse dashboard() {
+         return ownerService.dashboard(email()); 
+    }
+
+    @GetMapping("/properties") 
+    public List<PropertyResponse> properties() { 
+        return ownerService.properties(email()); 
+    }
+    
     @PutMapping("/properties/{id}") public PropertyResponse updateProperty(@PathVariable Long id, @Valid @RequestBody OwnerPropertyUpdateRequest request) { return ownerService.updateProperty(id, request, email()); }
     @PatchMapping("/properties/{id}/deactivate") @ResponseStatus(HttpStatus.NO_CONTENT) public void deactivateProperty(@PathVariable Long id) { ownerService.deactivateProperty(id, email()); }
 
