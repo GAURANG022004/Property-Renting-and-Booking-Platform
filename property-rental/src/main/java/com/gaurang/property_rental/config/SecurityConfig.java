@@ -39,6 +39,7 @@ public class SecurityConfig {
                         // Booking history + booking creation for authenticated users
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/owner/**").hasRole("OWNER")
+                        .requestMatchers("/payments/**").hasRole("TENANT")
                         .requestMatchers(HttpMethod.GET, "/bookings", "/bookings/**").hasAnyRole("TENANT", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/bookings", "/bookings/**").hasRole("TENANT")
 
