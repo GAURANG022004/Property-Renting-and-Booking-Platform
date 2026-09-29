@@ -28,9 +28,11 @@ public class OwnerController {
     
     @PutMapping("/properties/{id}") public PropertyResponse updateProperty(@PathVariable Long id, @Valid @RequestBody OwnerPropertyUpdateRequest request) { return ownerService.updateProperty(id, request, email()); }
     @PatchMapping("/properties/{id}/deactivate") @ResponseStatus(HttpStatus.NO_CONTENT) public void deactivateProperty(@PathVariable Long id) { ownerService.deactivateProperty(id, email()); }
+    @PatchMapping("/properties/{id}/activate") public PropertyResponse activateProperty(@PathVariable Long id) { return ownerService.activateProperty(id, email()); }
 
     @GetMapping("/bookings") public List<BookingResponse> bookings() { return ownerService.bookings(email()); }
     @PatchMapping("/bookings/{id}") public BookingResponse decideBooking(@PathVariable Long id, @Valid @RequestBody BookingDecisionRequest request) { return ownerService.decideBooking(id, request, email()); }
+    @PatchMapping("/bookings/{id}/checkin") public BookingResponse checkIn(@PathVariable Long id) { return ownerService.checkIn(id, email()); }
     
     @PatchMapping("/bookings/{id}/checkout") 
     public BookingResponse completeCheckout(@PathVariable Long id) {
