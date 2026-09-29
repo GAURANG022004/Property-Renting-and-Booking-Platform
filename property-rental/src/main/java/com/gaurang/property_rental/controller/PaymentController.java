@@ -1,7 +1,9 @@
 package com.gaurang.property_rental.controller;
 
-import com.gaurang.property_rental.dto.PaymentCreateRequest;
 import com.gaurang.property_rental.dto.PaymentResponse;
+import com.gaurang.property_rental.dto.RazorpayOrderRequest;
+import com.gaurang.property_rental.dto.RazorpayOrderResponse;
+import com.gaurang.property_rental.dto.RazorpayVerificationRequest;
 import com.gaurang.property_rental.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -20,11 +22,18 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping
-    public PaymentResponse createPayment(@Valid @RequestBody PaymentCreateRequest request) {
+    @PostMapping("/orders")
+    public RazorpayOrderResponse createOrder(@Valid @RequestBody RazorpayOrderRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = (String) auth.getPrincipal();
-        return paymentService.createPayment(request, userEmail);
+        return paymentService.createOrder(request, userEmail);
+    }
+
+    @PostMapping("/verify")
+    public PaymentResponse verifyPayment(@Valid @RequestBody RazorpayVerificationRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = (String) auth.getPrincipal();
+        return paymentService.verifyPayment(request, userEmail);
     }
 
     @GetMapping
