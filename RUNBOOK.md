@@ -131,14 +131,12 @@ The backend serves them under:
 2. Follow a tenant booking through the owner decision:
    - Booking starts as `PENDING`
    - Owner accepts and it becomes `PAYMENT_PENDING`
-   - Tenant pays the 10% advance using Razorpay Checkout
-   - Server verifies the Razorpay signature and captured amount; booking becomes `BOOKING_CONFIRMED`
-3. On/after the check-in date:
-   - Tenant pays the remaining 90% with Razorpay Checkout
-   - Server verifies the captured payment; booking becomes `ACTIVE`
+   - Tenant pays the total rent using Razorpay Checkout
+   - Server verifies the Razorpay signature and captured amount; booking becomes `CONFIRMED`
+3. On/after the check-in date, the owner checks the guest in from the owner workspace; booking becomes `ACTIVE`.
 4. Owner checks the guest out from the owner workspace:
    - Booking becomes `COMPLETED` and is eligible for a review
-5. The API creates Razorpay orders from the booking's server-calculated total, stored at booking creation; browser-supplied amounts are never trusted.
+5. The API creates a Razorpay order for the booking's server-calculated total, stored at booking creation; browser-supplied amounts are never trusted.
 
 ### G) Booking History
 1. While logged in, open:
