@@ -39,5 +39,12 @@ public class BookingController {
         String userEmail = (String) auth.getPrincipal();
         return bookingService.history(userEmail);
     }
+
+    @PatchMapping("/{id}/cancel")
+    public BookingResponse cancel(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = (String) auth.getPrincipal();
+        return bookingService.cancel(id, userEmail);
+    }
 }
 
