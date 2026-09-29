@@ -124,7 +124,23 @@ The backend serves them under:
 
 ---
 
-### F) Booking History
+### F) Booking Payments (Razorpay)
+1. Configure the backend environment before starting Spring Boot:
+   - `RAZORPAY_KEY_ID` (use the public test key while testing)
+   - `RAZORPAY_KEY_SECRET` (keep this server-side; never add it to Angular)
+2. Follow a tenant booking through the owner decision:
+   - Booking starts as `PENDING`
+   - Owner accepts and it becomes `PAYMENT_PENDING`
+   - Tenant pays the 10% advance using Razorpay Checkout
+   - Server verifies the Razorpay signature and captured amount; booking becomes `BOOKING_CONFIRMED`
+3. On/after the check-in date:
+   - Tenant pays the remaining 90% with Razorpay Checkout
+   - Server verifies the captured payment; booking becomes `ACTIVE`
+4. Owner checks the guest out from the owner workspace:
+   - Booking becomes `COMPLETED` and is eligible for a review
+5. The API creates Razorpay orders from the booking's server-calculated total, stored at booking creation; browser-supplied amounts are never trusted.
+
+### G) Booking History
 1. While logged in, open:
    - `/my-bookings`
 2. Expected results:
@@ -154,5 +170,6 @@ The backend serves them under:
 - JWT authentication with `Authorization: Bearer <token>`
 - Role-based route protection in Angular
 - Double booking prevention via repository overlap query
+- Razorpay order creation and server-side signature/payment verification
 - Image upload stored on filesystem and served via `/images/**`
 
