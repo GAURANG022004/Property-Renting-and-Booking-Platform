@@ -13,6 +13,8 @@ public record PaymentResponse(
         String transactionId,
         String status,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") LocalDate paymentDate,
-        String failureReason
+        String failureReason,
+        String paymentStage,
+        String razorpayOrderId
 ) {
 }
