@@ -11,6 +11,7 @@ public record PropertyResponse(
         double rating,
         String approvalStatus,
         String ownerEmail,
-        List<String> imageUrls
+        List<String> imageUrls,
+        String mapUrl
 ) {
 }
