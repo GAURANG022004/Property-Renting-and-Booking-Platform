@@ -31,6 +31,11 @@ public class OwnerController {
 
     @GetMapping("/bookings") public List<BookingResponse> bookings() { return ownerService.bookings(email()); }
     @PatchMapping("/bookings/{id}") public BookingResponse decideBooking(@PathVariable Long id, @Valid @RequestBody BookingDecisionRequest request) { return ownerService.decideBooking(id, request, email()); }
+    
+    @PatchMapping("/bookings/{id}/checkout") 
+    public BookingResponse completeCheckout(@PathVariable Long id) {
+         return ownerService.completeCheckout(id, email()); 
+    }
 
     @GetMapping("/availability") public List<AvailabilityBlockResponse> availability() { return ownerService.availability(email()); }
     @PostMapping("/availability") @ResponseStatus(HttpStatus.CREATED) public AvailabilityBlockResponse blockAvailability(@Valid @RequestBody AvailabilityBlockRequest request) { return ownerService.blockAvailability(request, email()); }
