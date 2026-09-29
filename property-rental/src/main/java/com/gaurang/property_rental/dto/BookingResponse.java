@@ -12,8 +12,6 @@ public record BookingResponse(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") LocalDate checkIn,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") LocalDate checkOut,
         String status,
-        double totalAmount,
-        double advanceAmount,
-        double balanceAmount
+        double totalAmount
 ) {
 }
