@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/payments/**").hasRole("TENANT")
                         .requestMatchers(HttpMethod.GET, "/bookings", "/bookings/**").hasAnyRole("TENANT", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/bookings", "/bookings/**").hasRole("TENANT")
+                        .requestMatchers(HttpMethod.PATCH, "/bookings/*/cancel").hasRole("TENANT")
 
                         // Only authenticated users/admins can create properties (ownership enforced in service later)
                         .requestMatchers(HttpMethod.POST, "/properties", "/properties/**").hasRole("OWNER")
