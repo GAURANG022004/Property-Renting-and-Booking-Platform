@@ -12,6 +12,14 @@ public record PropertyResponse(
         String approvalStatus,
         String ownerEmail,
         List<String> imageUrls,
-        String mapUrl
+        String mapUrl,
+        int maxGuests,
+        String checkInTime,
+        String checkOutTime,
+        String houseRules,
+        int cancellationFreeHours,
+        int refundPercentBeforeDeadline,
+        int refundPercentWithinDeadline,
+        int refundPercentAfterCheckIn
 ) {
 }

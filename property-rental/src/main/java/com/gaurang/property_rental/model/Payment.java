@@ -25,8 +25,11 @@ public class Payment {
     @Column(nullable = false, length = 20)
     private String paymentMethod;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String transactionId;
+
+    @Column(length = 100)
+    private String razorpayOrderId;
 
     @Column(nullable = false, length = 20)
     private String status = "PENDING";
@@ -37,15 +40,24 @@ public class Payment {
     @Column(length = 500)
     private String failureReason;
 
+    @Column(precision = 12, scale = 2)
+    private java.math.BigDecimal refundAmount;
+
+    @Column(length = 100)
+    private String razorpayRefundId;
+
+    @Column(length = 20)
+    private String refundStatus;
+
     protected Payment() {
     }
 
-    public Payment(Booking booking, User user, double amount, String paymentMethod, String transactionId) {
+    public Payment(Booking booking, User user, double amount, String paymentMethod, String razorpayOrderId) {
         this.booking = booking;
         this.user = user;
         this.amount = amount;
         this.paymentMethod = paymentMethod;
-        this.transactionId = transactionId;
+        this.razorpayOrderId = razorpayOrderId;
         this.paymentDate = LocalDate.now();
         this.status = "PENDING";
     }
@@ -74,6 +86,10 @@ public class Payment {
         return transactionId;
     }
 
+    public String getRazorpayOrderId() {
+        return razorpayOrderId;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -86,8 +102,18 @@ public class Payment {
         return failureReason;
     }
 
+    public java.math.BigDecimal getRefundAmount() { return refundAmount == null ? java.math.BigDecimal.ZERO : refundAmount; }
+    public String getRazorpayRefundId() { return razorpayRefundId; }
+    public String getRefundStatus() { return refundStatus; }
+
     public void markAsCompleted() {
         this.status = "COMPLETED";
+    }
+
+    public void markAsCompleted(String transactionId) {
+        this.transactionId = transactionId;
+        this.status = "COMPLETED";
+        this.paymentDate = LocalDate.now();
     }
 
     public void markAsFailed(String reason) {
@@ -97,5 +123,17 @@ public class Payment {
 
     public void markAsRefunded() {
         this.status = "REFUNDED";
+    }
+
+    public void recordRefund(java.math.BigDecimal amount, String refundId, String status) {
+        this.refundAmount = amount;
+        this.razorpayRefundId = refundId;
+        this.refundStatus = status;
+        this.status = amount.compareTo(java.math.BigDecimal.valueOf(this.amount)) >= 0 ? "REFUNDED" : "PARTIALLY_REFUNDED";
+    }
+
+    public void recordRefundFailure(String reason) {
+        this.refundStatus = "FAILED";
+        this.failureReason = reason;
     }
 }

@@ -28,6 +28,14 @@ import { PropertyService, Property } from '../../services/property.service';
 
       <div class="details">
         <p class="description">{{ property.description }}</p>
+        <a *ngIf="property.mapUrl" class="map-link" [href]="property.mapUrl" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+        <section class="house-rules">
+          <h3>Stay information</h3>
+          <p><strong>Maximum guests:</strong> {{ property.maxGuests }}</p>
+          <p><strong>Check-in:</strong> {{ property.checkInTime }} · <strong>Check-out:</strong> {{ property.checkOutTime }}</p>
+          <p><strong>Cancellation:</strong> {{ property.cancellationFreeHours }} hours or more before check-in: {{ property.refundPercentBeforeDeadline }}% refund; closer to check-in: {{ property.refundPercentWithinDeadline }}%; after check-in: {{ property.refundPercentAfterCheckIn }}%.</p>
+          <p *ngIf="property.houseRules"><strong>House rules:</strong> {{ property.houseRules }}</p>
+        </section>
         <div class="stats">
           <div class="stat">
             <div class="label">Price</div>
@@ -117,6 +125,17 @@ import { PropertyService, Property } from '../../services/property.service';
         font-weight: 600;
         line-height: 1.5;
       }
+      .map-link {
+        display: inline-block;
+        margin-bottom: 16px;
+        color: #176b70;
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .house-rules { margin:0 0 16px; padding:14px; border:1px solid #e5eceb; border-radius:10px; background:#f8fbfa; }
+      .house-rules h3 { margin:0 0 8px; font-size:15px; }
+      .house-rules p { margin:6px 0; color:#475569; line-height:1.45; }
       .stats {
         display: flex;
         gap: 20px;

@@ -14,6 +14,8 @@ public record PaymentResponse(
         String status,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") LocalDate paymentDate,
         String failureReason,
-        String razorpayOrderId
+        String razorpayOrderId,
+        java.math.BigDecimal refundAmount,
+        String refundStatus
 ) {
 }

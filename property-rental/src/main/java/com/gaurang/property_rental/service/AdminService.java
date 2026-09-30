@@ -21,11 +21,12 @@ public class AdminService {
     private final PropertyCategoryRepository categoryRepository;
     private final ComplaintRepository complaintRepository;
     private final SystemSettingRepository settingRepository;
+    private final BookingService bookingService;
 
     public AdminService(UserRepository userRepository, PropertyRepository propertyRepository,
                         PropertyImageRepository propertyImageRepository, BookingRepository bookingRepository,
                         PropertyCategoryRepository categoryRepository, ComplaintRepository complaintRepository,
-                        SystemSettingRepository settingRepository) {
+                        SystemSettingRepository settingRepository, BookingService bookingService) {
         this.userRepository = userRepository;
         this.propertyRepository = propertyRepository;
         this.propertyImageRepository = propertyImageRepository;
@@ -33,6 +34,7 @@ public class AdminService {
         this.categoryRepository = categoryRepository;
         this.complaintRepository = complaintRepository;
         this.settingRepository = settingRepository;
+        this.bookingService = bookingService;
     }
 
     @Transactional(readOnly = true)
@@ -80,9 +82,7 @@ public class AdminService {
 
     @Transactional
     public BookingResponse cancelBooking(Long id) {
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> notFound("Booking"));
-        booking.cancel();
-        return toBooking(booking);
+        return bookingService.cancelAsAdmin(id);
     }
 
     @Transactional(readOnly = true)
@@ -142,8 +142,8 @@ public class AdminService {
     }
 
     private AdminUserResponse toUser(User u) { return new AdminUserResponse(u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getPhoneNumber(), u.getRoles(), u.isActive()); }
-    private PropertyResponse toProperty(Property p) { return new PropertyResponse(p.getId(), p.getTitle(), p.getDescription(), p.getLocation(), p.getPricePerNight(), p.getRating(), p.getApprovalStatus(), p.getOwner().getEmail(), propertyImageRepository.findByPropertyId(p.getId()).stream().map(i -> "/images/" + i.getRelativePath()).toList()); }
-    private BookingResponse toBooking(Booking b) { Property p = b.getProperty(); return new BookingResponse(b.getId(), p.getId(), p.getTitle(), p.getLocation(), b.getCheckIn(), b.getCheckOut(), b.getStatus()); }
+    private PropertyResponse toProperty(Property p) { return new PropertyResponse(p.getId(), p.getTitle(), p.getDescription(), p.getLocation(), p.getPricePerNight(), p.getRating(), p.getApprovalStatus(), p.getOwner().getEmail(), propertyImageRepository.findByPropertyId(p.getId()).stream().map(i -> "/images/" + i.getRelativePath()).toList(), p.getMapUrl(), p.getMaxGuests(), p.getCheckInTime(), p.getCheckOutTime(), p.getHouseRules(), p.getCancellationFreeHours(), p.getRefundPercentBeforeDeadline(), p.getRefundPercentWithinDeadline(), p.getRefundPercentAfterCheckIn()); }
+    private BookingResponse toBooking(Booking b) { Property p = b.getProperty(); return new BookingResponse(b.getId(), p.getId(), p.getTitle(), p.getLocation(), b.getCheckIn(), b.getCheckOut(), b.getStatus(), b.getTotalAmount().doubleValue(), b.getGuestCount(), b.getBookingType(), p.getMaxGuests(), p.getCheckInTime(), p.getCheckOutTime(), p.getHouseRules(), p.getCancellationFreeHours(), p.getRefundPercentBeforeDeadline(), p.getRefundPercentWithinDeadline(), p.getRefundPercentAfterCheckIn(), b.getRefundAmount(), b.getRefundStatus()); }
     private CategoryResponse toCategory(PropertyCategory c) { return new CategoryResponse(c.getId(), c.getName(), c.getDescription()); }
     private ComplaintResponse toComplaint(Complaint c) { return new ComplaintResponse(c.getId(), c.getReportedBy().getEmail(), c.getSubject(), c.getDescription(), c.getStatus(), c.getResolutionNote()); }
     private ResponseStatusException notFound(String resource) { return new ResponseStatusException(HttpStatus.NOT_FOUND, resource + " not found"); }

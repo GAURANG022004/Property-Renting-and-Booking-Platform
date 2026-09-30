@@ -72,9 +72,13 @@ public class PropertyService {
                 request.description(),
                 request.location(),
                 request.pricePerNight(),
-                request.rating(),
+                request.mapUrl() == null || request.mapUrl().isBlank() ? null : request.mapUrl().trim(),
+                0.0,
                 owner
         );
+            property.updateBookingRules(request.maxGuests(), request.checkInTime(), request.checkOutTime(), request.houseRules(),
+                request.cancellationFreeHours(), request.refundPercentBeforeDeadline(),
+                request.refundPercentWithinDeadline(), request.refundPercentAfterCheckIn());
 
         Property saved = propertyRepository.save(property);
         return toResponse(saved);
@@ -94,7 +98,11 @@ public class PropertyService {
                 p.getRating(),
                 p.getApprovalStatus(),
                 p.getOwner() != null ? p.getOwner().getEmail() : null,
-                imageUrls
+                imageUrls,
+                p.getMapUrl(),
+                p.getMaxGuests(), p.getCheckInTime(), p.getCheckOutTime(), p.getHouseRules(),
+                p.getCancellationFreeHours(), p.getRefundPercentBeforeDeadline(),
+                p.getRefundPercentWithinDeadline(), p.getRefundPercentAfterCheckIn()
         );
     }
 }

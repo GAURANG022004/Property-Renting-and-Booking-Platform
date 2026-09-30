@@ -34,6 +34,18 @@ import { PropertyCreateRequest, PropertyService } from '../../services/property.
           <input name="location" [(ngModel)]="request.location" required />
         </label>
 
+        <label>
+          Google Maps link
+          <input
+            name="mapUrl"
+            type="url"
+            [(ngModel)]="request.mapUrl"
+            placeholder="https://maps.app.goo.gl/..."
+            pattern="https://((www[.])?google[.][a-z.]+/maps.*|maps[.]google[.][a-z.]+.*|maps[.]app[.]goo[.]gl/.*|goo[.]gl/maps/.*)"
+          />
+          <span class="hint">Paste a Google Maps share link so guests can navigate to the property.</span>
+        </label>
+
         <div class="row">
           <label>
             Price Per Night
@@ -46,17 +58,23 @@ import { PropertyCreateRequest, PropertyService } from '../../services/property.
             />
           </label>
 
-          <label>
-            Rating
-            <input
-              name="rating"
-              type="number"
-              step="0.1"
-              [(ngModel)]="request.rating"
-              required
-            />
-          </label>
         </div>
+
+        <div class="row">
+          <label>Maximum guests<input name="maxGuests" type="number" min="1" max="50" [(ngModel)]="request.maxGuests" required /></label>
+          <label>Check-in time<input name="checkInTime" type="time" [(ngModel)]="request.checkInTime" required /></label>
+          <label>Check-out time<input name="checkOutTime" type="time" [(ngModel)]="request.checkOutTime" required /></label>
+        </div>
+
+        <label>House rules<textarea name="houseRules" rows="3" [(ngModel)]="request.houseRules" placeholder="Smoking, pets, parties, and other property rules"></textarea></label>
+
+        <fieldset class="policy-fields">
+          <legend>Cancellation policy</legend>
+          <label>Free cancellation cutoff (hours before check-in)<input name="cancellationFreeHours" type="number" min="0" max="720" [(ngModel)]="request.cancellationFreeHours" required /></label>
+          <label>Refund before cutoff (%)<input name="refundPercentBeforeDeadline" type="number" min="0" max="100" [(ngModel)]="request.refundPercentBeforeDeadline" required /></label>
+          <label>Refund within cutoff (%)<input name="refundPercentWithinDeadline" type="number" min="0" max="100" [(ngModel)]="request.refundPercentWithinDeadline" required /></label>
+          <label>Refund after check-in (%)<input name="refundPercentAfterCheckIn" type="number" min="0" max="100" [(ngModel)]="request.refundPercentAfterCheckIn" required /></label>
+        </fieldset>
 
         <label class="upload">
           Upload Images
@@ -122,10 +140,17 @@ import { PropertyCreateRequest, PropertyService } from '../../services/property.
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
       }
+      .policy-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; border:1px solid #d8e1e7; border-radius:10px; padding:12px; }
+      .policy-fields legend { padding:0 6px; font-weight:800; }
       .upload .hint {
         color: #6b7280;
         font-weight: 600;
         font-size: 13px;
+      }
+      .hint {
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 500;
       }
       .actions {
         display: flex;
@@ -174,7 +199,15 @@ export class OwnerAddPropertyComponent {
     description: '',
     location: '',
     pricePerNight: 0,
-    rating: 0,
+    mapUrl: '',
+    maxGuests: 4,
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
+    houseRules: '',
+    cancellationFreeHours: 48,
+    refundPercentBeforeDeadline: 100,
+    refundPercentWithinDeadline: 0,
+    refundPercentAfterCheckIn: 0,
   };
 
   selectedFiles: File[] = [];
@@ -198,7 +231,15 @@ export class OwnerAddPropertyComponent {
       description: '',
       location: '',
       pricePerNight: 0,
-      rating: 0,
+      mapUrl: '',
+      maxGuests: 4,
+      checkInTime: '15:00',
+      checkOutTime: '11:00',
+      houseRules: '',
+      cancellationFreeHours: 48,
+      refundPercentBeforeDeadline: 100,
+      refundPercentWithinDeadline: 0,
+      refundPercentAfterCheckIn: 0,
     };
     this.selectedFiles = [];
   }
