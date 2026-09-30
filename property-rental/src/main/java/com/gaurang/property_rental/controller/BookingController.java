@@ -2,6 +2,11 @@ package com.gaurang.property_rental.controller;
 
 import com.gaurang.property_rental.dto.BookingCreateRequest;
 import com.gaurang.property_rental.dto.BookingResponse;
+import com.gaurang.property_rental.dto.AvailabilityCheckRequest;
+import com.gaurang.property_rental.dto.AvailabilityCheckResponse;
+import com.gaurang.property_rental.dto.CancellationQuoteResponse;
+import com.gaurang.property_rental.dto.CancellationRequest;
+import com.gaurang.property_rental.dto.CancellationResponse;
 import com.gaurang.property_rental.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -29,8 +34,14 @@ public class BookingController {
                 request.propertyId(),
                 request.checkIn(),
                 request.checkOut(),
+                request.guestCount(),
                 userEmail
         );
+    }
+
+    @PostMapping("/availability-check")
+    public AvailabilityCheckResponse checkAvailability(@Valid @RequestBody AvailabilityCheckRequest request) {
+        return bookingService.checkAvailability(request);
     }
 
     @GetMapping
@@ -40,11 +51,18 @@ public class BookingController {
         return bookingService.history(userEmail);
     }
 
-    @PatchMapping("/{id}/cancel")
-    public BookingResponse cancel(@PathVariable Long id) {
+    @GetMapping("/{id}/cancellation-quote")
+    public CancellationQuoteResponse cancellationQuote(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = (String) auth.getPrincipal();
-        return bookingService.cancel(id, userEmail);
+        return bookingService.cancellationQuote(id, userEmail);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public CancellationResponse cancel(@PathVariable Long id, @Valid @RequestBody CancellationRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = (String) auth.getPrincipal();
+        return bookingService.cancel(id, request.acknowledged(), userEmail);
     }
 }
 
