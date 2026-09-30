@@ -43,5 +43,9 @@ public class OwnerController {
     @PostMapping("/availability") @ResponseStatus(HttpStatus.CREATED) public AvailabilityBlockResponse blockAvailability(@Valid @RequestBody AvailabilityBlockRequest request) { return ownerService.blockAvailability(request, email()); }
     @DeleteMapping("/availability/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void removeAvailability(@PathVariable Long id) { ownerService.removeAvailabilityBlock(id, email()); }
 
+    @GetMapping("/availability-windows") public List<AvailabilityWindowResponse> availabilityWindows() { return ownerService.availabilityWindows(email()); }
+    @PostMapping("/availability-windows") @ResponseStatus(HttpStatus.CREATED) public AvailabilityWindowResponse addAvailabilityWindow(@Valid @RequestBody AvailabilityWindowRequest request) { return ownerService.addAvailabilityWindow(request, email()); }
+    @DeleteMapping("/availability-windows/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void removeAvailabilityWindow(@PathVariable Long id) { ownerService.removeAvailabilityWindow(id, email()); }
+
     private String email() { return (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); }
 }
