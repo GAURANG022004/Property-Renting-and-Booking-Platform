@@ -10,6 +10,15 @@ export type Property = {
   location: string;
   pricePerNight: number;
   rating: number;
+  mapUrl: string | null;
+  maxGuests: number;
+  checkInTime: string;
+  checkOutTime: string;
+  houseRules: string;
+  cancellationFreeHours: number;
+  refundPercentBeforeDeadline: number;
+  refundPercentWithinDeadline: number;
+  refundPercentAfterCheckIn: number;
   approvalStatus: string;
   ownerEmail: string;
   imageUrls: string[];
@@ -20,7 +29,15 @@ export type PropertyCreateRequest = {
   description: string;
   location: string;
   pricePerNight: number;
-  rating: number;
+  mapUrl: string;
+  maxGuests: number;
+  checkInTime: string;
+  checkOutTime: string;
+  houseRules: string;
+  cancellationFreeHours: number;
+  refundPercentBeforeDeadline: number;
+  refundPercentWithinDeadline: number;
+  refundPercentAfterCheckIn: number;
 };
 
 type PropertyFilters = {

@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { BookingService } from '../../services/booking.service';
+import { AvailabilityCheck, BookingService } from '../../services/booking.service';
+import { Property, PropertyService } from '../../services/property.service';
 
 @Component({
   selector: 'app-booking',
@@ -10,13 +11,14 @@ import { BookingService } from '../../services/booking.service';
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      <h2>Book Property</h2>
-      <p class="muted">Property ID: {{ propertyId }}</p>
+      <h2>Request a booking</h2>
+      <p class="muted" *ngIf="property">{{ property.title }} · {{ property.location }}</p>
+      <p class="muted" *ngIf="propertyLoading">Loading property price…</p>
 
-      <form class="form" (ngSubmit)="onSubmit()" #f="ngForm">
+      <form class="form" (ngSubmit)="checkAvailability()" #f="ngForm">
         <label>
           Check-in
-          <input type="date" name="checkIn" required [(ngModel)]="checkIn" />
+          <input type="date" name="checkIn" [min]="today" required [(ngModel)]="checkIn" (ngModelChange)="availability = null" />
         </label>
 
         <label>
@@ -24,15 +26,32 @@ import { BookingService } from '../../services/booking.service';
           <input
             type="date"
             name="checkOut"
+            [min]="checkIn || today"
             required
             [(ngModel)]="checkOut"
+            (ngModelChange)="availability = null"
           />
         </label>
 
-        <button type="submit" [disabled]="loading || !f.form.valid">
-          Confirm Booking
+        <label>
+          Guests
+          <input type="number" name="guestCount" min="1" [max]="property?.maxGuests ?? 50" required [(ngModel)]="guestCount" (ngModelChange)="availability = null" />
+          <span class="muted">Maximum {{ property?.maxGuests ?? 50 }} guests</span>
+        </label>
+
+        <button type="submit" [disabled]="checkingAvailability || propertyLoading || !property || !f.form.valid || nights <= 0">
+          {{ checkingAvailability ? 'Checking dates…' : 'Check availability and price' }}
         </button>
       </form>
+
+      <section class="quote result" *ngIf="availability" [class.unavailable]="!availability.available">
+        <strong>{{ availability.message }}</strong>
+        <div *ngIf="availability.available"><span>{{ nights }} nights · Total due</span><strong>{{ availability.totalAmount | currency:'INR':'symbol':'1.2-2' }}</strong></div>
+        <p *ngIf="availability.available">{{ availability.instantBooking ? 'Instant booking: payment confirms immediately.' : 'Request booking: owner approval is required before payment.' }}</p>
+        <button *ngIf="availability.available" type="button" (click)="submitBooking()" [disabled]="loading">
+          {{ loading ? 'Submitting…' : availability.instantBooking ? 'Continue to payment' : 'Request booking' }}
+        </button>
+      </section>
 
       <p class="error" *ngIf="error">{{ error }}</p>
       <p class="ok" *ngIf="success">{{ success }}</p>
@@ -53,6 +72,9 @@ import { BookingService } from '../../services/booking.service';
         max-width: 420px;
         margin-top: 14px;
       }
+      .quote { display:grid; gap:8px; padding:14px; border:1px solid #d8e7e5; border-radius:12px; background:#f5fbfa; }
+      .quote div { display:flex; justify-content:space-between; gap:12px; color:#475569; }
+      .quote strong { color:#172033; white-space:nowrap; }
       label {
         display: flex;
         flex-direction: column;
@@ -92,47 +114,81 @@ import { BookingService } from '../../services/booking.service';
     `,
   ],
 })
-export class BookingComponent {
+export class BookingComponent implements OnInit {
   propertyId: number | null = null;
+  property: Property | null = null;
   checkIn = '';
   checkOut = '';
+  guestCount = 1;
+  availability: AvailabilityCheck | null = null;
+  readonly today = new Date().toISOString().slice(0, 10);
   loading = false;
+  checkingAvailability = false;
+  propertyLoading = true;
   error = '';
   success = '';
 
   constructor(
     private route: ActivatedRoute,
     private bookingService: BookingService,
+    private propertyService: PropertyService,
     private router: Router
   ) {
     const id = this.route.snapshot.paramMap.get('id');
     this.propertyId = id ? Number(id) : null;
   }
 
-  onSubmit() {
+  ngOnInit() {
+    if (!this.propertyId) {
+      this.propertyLoading = false;
+      this.error = 'Invalid property id';
+      return;
+    }
+    this.propertyService.getPropertyById(this.propertyId).subscribe({
+      next: property => { this.property = property; this.propertyLoading = false; },
+      error: err => { this.propertyLoading = false; this.error = err?.error?.message ?? 'Unable to load property price.'; },
+    });
+  }
+
+  get nights() {
+    if (!this.checkIn || !this.checkOut) return 0;
+    const start = Date.parse(`${this.checkIn}T00:00:00Z`);
+    const end = Date.parse(`${this.checkOut}T00:00:00Z`);
+    return Number.isFinite(start) && Number.isFinite(end) && end > start ? (end - start) / 86_400_000 : 0;
+  }
+
+  checkAvailability() {
     if (!this.propertyId) {
       this.error = 'Invalid property id';
       return;
     }
-
-    this.loading = true;
+    this.checkingAvailability = true;
     this.error = '';
     this.success = '';
+    this.availability = null;
+    this.bookingService.checkAvailability(this.propertyId, this.checkIn, this.checkOut, this.guestCount).subscribe({
+      next: result => { this.availability = result; this.checkingAvailability = false; },
+      error: err => { this.error = err?.error?.message ?? 'Could not check these dates.'; this.checkingAvailability = false; },
+    });
+  }
 
-    this.bookingService
-      .createBooking(this.propertyId, this.checkIn, this.checkOut)
-      .subscribe({
-        next: () => {
-          this.loading = false;
-          this.success = 'Booking request submitted for owner approval.';
-          this.router.navigate(['/my-bookings']);
-        },
-        error: (err) => {
-          this.loading = false;
-          this.error =
-            err?.error?.message ??
-            'Booking failed. Make sure dates do not overlap.';
-        },
-      });
+  submitBooking() {
+    if (!this.propertyId || !this.availability?.available) return;
+    this.loading = true;
+    this.error = '';
+    this.bookingService.createBooking(this.propertyId, this.checkIn, this.checkOut, this.guestCount).subscribe({
+      next: booking => {
+        this.loading = false;
+        this.success = booking.status === 'PAYMENT_PENDING'
+          ? 'Instant booking reserved. Review the policy and pay to confirm.'
+          : 'Booking request submitted for owner approval.';
+        this.router.navigate(['/my-bookings']);
+      },
+      error: err => {
+        this.loading = false;
+        this.availability = null;
+        this.error = err?.error?.message ?? 'These dates are no longer available. Please check again.';
+      },
+    });
   }
 }
