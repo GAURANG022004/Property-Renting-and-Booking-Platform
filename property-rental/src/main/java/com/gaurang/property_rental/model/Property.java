@@ -16,7 +16,7 @@ public class Property {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, length = 10000)
     private String description;
 
     @Column(nullable = false)
