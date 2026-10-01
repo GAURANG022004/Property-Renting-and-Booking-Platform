@@ -24,7 +24,7 @@ import { PropertyService, Property } from '../../services/property.service';
         <a *ngIf="listing.mapUrl" class="map-link" [href]="listing.mapUrl" target="_blank" rel="noopener noreferrer">View map <span aria-hidden="true">↗</span></a>
       </header>
 
-      <section class="gallery" *ngIf="listing.imageUrls?.length; else noPhotos">
+      <section class="gallery" [class.single-photo]="listing.imageUrls.length === 1" *ngIf="listing.imageUrls?.length; else noPhotos">
         <img class="hero-photo" [src]="listing.imageUrls[0]" [alt]="listing.title" />
         <div class="photo-strip" *ngIf="listing.imageUrls.length > 1">
           <img *ngFor="let image of listing.imageUrls.slice(1, 5)" [src]="image" [alt]="listing.title" />
@@ -145,6 +145,7 @@ import { PropertyService, Property } from '../../services/property.service';
         border-radius: 8px;
         background: #e9efec;
       }
+      .gallery.single-photo { grid-template-columns: minmax(0, 1fr); }
       .hero-photo {
         width: 100%;
         height: 100%;
