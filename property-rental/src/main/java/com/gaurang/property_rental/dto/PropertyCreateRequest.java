@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 
 public record PropertyCreateRequest(
         @NotBlank String title,
-        @NotBlank String description,
+        @NotBlank @Size(max = 10000) String description,
         @NotBlank String location,
         @NotNull @DecimalMin("0.0") double pricePerNight,
         @Size(max = 2048) @Pattern(regexp = "(?i)^$|^https://(?:(?:www\\.)?google\\.[a-z.]+/maps(?:[/?#].*)?|maps\\.google\\.[a-z.]+(?:/.*)?|maps\\.app\\.goo\\.gl/.*|goo\\.gl/maps/.*)$") String mapUrl,
