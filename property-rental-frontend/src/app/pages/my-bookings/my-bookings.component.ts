@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { BookingService, Booking, CancellationQuote } from '../../services/booking.service';
 import { PaymentService, RazorpayCheckoutResponse, RazorpayOrder } from '../../services/payment.service';
 import { RazorpayCheckoutService } from '../../services/razorpay-checkout.service';
+import { ReviewService } from '../../services/review.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-my-bookings',
@@ -47,6 +49,23 @@ import { RazorpayCheckoutService } from '../../services/razorpay-checkout.servic
           <p class="next-step" *ngIf="b.status === 'CONFIRMED'">Your booking is confirmed and payment is complete. The owner will check you in on arrival.</p>
           <p class="next-step" *ngIf="b.status === 'ACTIVE'">You are checked in. Enjoy your stay.</p>
           <p class="next-step" *ngIf="b.status === 'COMPLETED'">Stay completed. Thank you for booking with us.</p>
+          <p class="next-step" *ngIf="b.status === 'COMPLETED' && hasReviewed(b.id)">You have reviewed this property.</p>
+          <form class="review-form" *ngIf="b.status === 'COMPLETED' && !hasReviewed(b.id)" (ngSubmit)="submitReview(b)">
+            <h4>Review your stay</h4>
+            <label>Rating
+              <select [name]="'reviewRating' + b.id" [(ngModel)]="reviewDrafts[b.id].rating" required>
+                <option [ngValue]="5">5 - Excellent</option>
+                <option [ngValue]="4">4 - Very good</option>
+                <option [ngValue]="3">3 - Good</option>
+                <option [ngValue]="2">2 - Fair</option>
+                <option [ngValue]="1">1 - Poor</option>
+              </select>
+            </label>
+            <label>Your experience
+              <textarea [name]="'reviewComment' + b.id" [(ngModel)]="reviewDrafts[b.id].comment" rows="3" required maxlength="2000" placeholder="Share your experience after your stay."></textarea>
+            </label>
+            <button type="submit" [disabled]="processingBookingId === b.id">{{ processingBookingId === b.id ? 'Submitting…' : 'Submit review' }}</button>
+          </form>
           <p class="next-step cancelled" *ngIf="b.status === 'REJECTED'">Unfortunately, the owner is unable to accept your booking request for these dates. Please try different dates or explore other properties.</p>
           <p class="next-step cancelled" *ngIf="b.status === 'CANCELLED'">Booking cancelled. Refund: {{ b.refundAmount | currency:'INR':'symbol':'1.2-2' }} ({{ b.refundStatus || 'NO_PAYMENT' }}).</p>
         </div>
@@ -133,6 +152,10 @@ import { RazorpayCheckoutService } from '../../services/razorpay-checkout.servic
       .amounts dt { color:#64748b; font-size:12px; }
       .amounts dd { margin:4px 0 0; color:#172033; font-weight:800; }
       .next-step { margin:10px 0; color:#475569; font-size:13px; }
+      .review-form { display:grid; gap:10px; margin-top:14px; padding:14px; border:1px solid #dbe7e5; border-radius:12px; background:#f8fbfa; }
+      .review-form h4 { margin:0; }
+      .review-form label { display:grid; gap:6px; font-weight:700; }
+      .review-form select,.review-form textarea { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
       .cancelled { color:#a33a2b; }
       button { border:0; border-radius:8px; padding:10px 14px; background:#176b70; color:#fff; font-weight:800; cursor:pointer; }
       .cancel-button { margin-top:4px; background:#a33a2b; }
@@ -179,6 +202,8 @@ export class MyBookingsComponent {
   error = '';
   notice = '';
   processingBookingId: number | null = null;
+  reviewedBookingIds = new Set<number>();
+  reviewDrafts: Record<number, { rating: number; comment: string }> = {};
   policyBooking: Booking | null = null;
   policyAcknowledged = false;
   cancellationBooking: Booking | null = null;
@@ -188,7 +213,8 @@ export class MyBookingsComponent {
   constructor(
     private bookingService: BookingService,
     private paymentService: PaymentService,
-    private checkout: RazorpayCheckoutService
+    private checkout: RazorpayCheckoutService,
+    private reviewService: ReviewService
   ) {}
 
   ngOnInit() {
@@ -198,9 +224,16 @@ export class MyBookingsComponent {
   loadBookings() {
     this.loading = true;
 
-    this.bookingService.getMyBookings().subscribe({
-      next: (arr) => {
-        this.bookings = arr ?? [];
+    forkJoin({
+      bookings: this.bookingService.getMyBookings(),
+      reviews: this.reviewService.getMyReviews(),
+    }).subscribe({
+      next: ({ bookings, reviews }) => {
+        this.bookings = bookings ?? [];
+        this.reviewedBookingIds = new Set((reviews ?? []).map(review => review.bookingId));
+        for (const booking of this.bookings) {
+          this.reviewDrafts[booking.id] ??= { rating: 5, comment: '' };
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -223,6 +256,30 @@ export class MyBookingsComponent {
 
   canCancel(booking: Booking) {
     return ['PENDING', 'PAYMENT_PENDING', 'CONFIRMED', 'ACTIVE'].includes(booking.status);
+  }
+
+  hasReviewed(bookingId: number) {
+    return this.reviewedBookingIds.has(bookingId);
+  }
+
+  submitReview(booking: Booking) {
+    const draft = this.reviewDrafts[booking.id];
+    if (booking.status !== 'COMPLETED' || !draft || this.hasReviewed(booking.id) || this.processingBookingId !== null) return;
+
+    this.error = '';
+    this.notice = '';
+    this.processingBookingId = booking.id;
+    this.reviewService.createReview(booking.id, draft.rating, draft.comment.trim()).subscribe({
+      next: () => {
+        this.processingBookingId = null;
+        this.reviewedBookingIds.add(booking.id);
+        this.notice = 'Your review has been submitted.';
+      },
+      error: err => {
+        this.processingBookingId = null;
+        this.error = err?.error?.message ?? 'Unable to submit your review.';
+      },
+    });
   }
 
   openCancellation(booking: Booking) {
