@@ -8,6 +8,7 @@ import { OwnerAddPropertyComponent } from './pages/owner/owner-add-property.comp
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { OwnerWorkspaceComponent } from './pages/owner/owner-workspace.component';
+import { OwnerReviewsComponent } from './pages/owner/owner-reviews.component';
 import { AdminWorkspaceComponent } from './pages/admin/admin-workspace.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
@@ -45,6 +46,7 @@ export const routes: Routes = [
     data: { roles: ['TENANT'] },
   },
   { path: 'owner', component: OwnerWorkspaceComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['OWNER'] } },
+  { path: 'owner/reviews', component: OwnerReviewsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['OWNER'] } },
   { path: 'admin', component: AdminWorkspaceComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN'] } },
 
   { path: '**', redirectTo: '' }
