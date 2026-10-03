@@ -1,1 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
+.property-reviews h2 span{color:#326b65;font-family:inherit;font-size:15px;font-weight:700}
+.property-reviews .review-empty{color:#64716e}
+.property-reviews .review-card{margin:14px 0;padding:16px;border:1px solid #e3e9e6;border-radius:8px}
+.property-reviews .review-card header{display:flex;justify-content:space-between;gap:12px}
+.property-reviews .review-score{color:#8a641e;font-weight:800}
+.property-reviews .review-card small{display:block;margin-top:5px;color:#71807c}
+.property-reviews .review-card>p{color:#465553;line-height:1.6;white-space:pre-wrap}
+.property-reviews .owner-response{margin-top:12px;padding:12px;border-left:3px solid #176c68;background:#f2f7f5}
+.property-reviews .owner-response p{margin:6px 0 0;color:#465553;white-space:pre-wrap}
