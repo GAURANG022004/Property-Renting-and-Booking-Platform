@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PropertyService, Property } from '../../services/property.service';
+import { ReviewService, Review } from '../../services/review.service';
 
 @Component({
   selector: 'app-property-details',
@@ -61,6 +62,22 @@ import { PropertyService, Property } from '../../services/property.service';
           <section class="section-block rules" *ngIf="listing.houseRules">
             <h2>House rules</h2>
             <p>{{ listing.houseRules }}</p>
+          </section>
+
+          <section class="section-block property-reviews">
+            <h2>Guest reviews <span *ngIf="listing.rating > 0">· {{ listing.rating | number:'1.1-1' }} / 5</span></h2>
+            <p class="review-empty" *ngIf="!reviews.length && !reviewsLoading">No reviews yet.</p>
+            <p class="review-empty" *ngIf="reviewsLoading">Loading guest reviews…</p>
+            <p class="error" *ngIf="reviewsError">{{ reviewsError }}</p>
+            <article class="review-card" *ngFor="let review of reviews">
+              <header><strong>{{ review.userName }}</strong><span class="review-score">★ {{ review.rating }} / 5</span></header>
+              <small>{{ review.reviewDate }}</small>
+              <p>{{ review.comment }}</p>
+              <div class="owner-response" *ngIf="review.ownerResponse">
+                <strong>Owner response</strong>
+                <p>{{ review.ownerResponse }}</p>
+              </div>
+            </article>
           </section>
         </div>
 
@@ -262,11 +279,15 @@ import { PropertyService, Property } from '../../services/property.service';
 export class PropertyDetailsComponent {
   propertyId: string | null;
   property: Property | null = null;
+  reviews: Review[] = [];
+  reviewsLoading = true;
+  reviewsError = '';
   error = '';
 
   constructor(
     private route: ActivatedRoute,
-    private propertyService: PropertyService
+    private propertyService: PropertyService,
+    private reviewService: ReviewService
   ) {
     this.propertyId = this.route.snapshot.paramMap.get('id');
   }
@@ -279,11 +300,22 @@ export class PropertyDetailsComponent {
     }
 
     this.propertyService.getPropertyById(id).subscribe({
-      next: (p) => (this.property = p),
+      next: (p) => {
+        this.property = p;
+        this.reviewService.getPropertyReviews(p.id).subscribe({
+          next: reviews => {
+            this.reviews = reviews;
+            this.reviewsLoading = false;
+          },
+          error: err => {
+            this.reviewsError = err?.error?.message ?? 'Unable to load guest reviews.';
+            this.reviewsLoading = false;
+          },
+        });
+      },
       error: (err) => {
         this.error = err?.error?.message ?? 'Failed to load property';
       },
     });
   }
 }
-
