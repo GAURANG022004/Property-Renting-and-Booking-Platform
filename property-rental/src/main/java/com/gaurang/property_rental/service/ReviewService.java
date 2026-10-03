@@ -2,6 +2,7 @@
 
 import com.gaurang.property_rental.dto.ReviewCreateRequest;
 import com.gaurang.property_rental.dto.ReviewResponse;
+import com.gaurang.property_rental.dto.owner.OwnerReviewResponseRequest;
 import com.gaurang.property_rental.model.Booking;
 import com.gaurang.property_rental.model.Property;
 import com.gaurang.property_rental.model.Review;
@@ -93,6 +94,27 @@ public class ReviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getOwnerReviews(String ownerEmail) {
+        return reviewRepository.findAllByProperty_Owner_EmailIgnoreCaseOrderByReviewDateDesc(ownerEmail).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public ReviewResponse respondToReview(Long reviewId, OwnerReviewResponseRequest request, String ownerEmail) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (review.getProperty().getOwner() == null
+                || !review.getProperty().getOwner().getEmail().equalsIgnoreCase(ownerEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only respond to reviews for your properties");
+        }
+
+        review.setOwnerResponse(request.response().trim());
+        return toResponse(review);
+    }
+
     @Transactional
     public void deleteReview(Long reviewId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -137,6 +159,7 @@ public class ReviewService {
                 user.getFirstName() + " " + user.getLastName(),
                 review.getRating(),
                 review.getComment(),
+                review.getOwnerResponse(),
                 review.getReviewDate(),
                 review.isApproved()
         );
