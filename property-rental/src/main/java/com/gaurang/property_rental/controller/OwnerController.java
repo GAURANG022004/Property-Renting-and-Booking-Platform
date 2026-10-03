@@ -2,7 +2,9 @@ package com.gaurang.property_rental.controller;
 
 import com.gaurang.property_rental.dto.BookingResponse;
 import com.gaurang.property_rental.dto.PropertyResponse;
+import com.gaurang.property_rental.dto.ReviewResponse;
 import com.gaurang.property_rental.dto.owner.*;
+import com.gaurang.property_rental.service.ReviewService;
 import com.gaurang.property_rental.service.OwnerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -14,7 +16,11 @@ import java.util.List;
 @RequestMapping("/owner")
 public class OwnerController {
     private final OwnerService ownerService;
-    public OwnerController(OwnerService ownerService) { this.ownerService = ownerService; }
+    private final ReviewService reviewService;
+    public OwnerController(OwnerService ownerService, ReviewService reviewService) {
+        this.ownerService = ownerService;
+        this.reviewService = reviewService;
+    }
 
     @GetMapping("/dashboard") 
     public OwnerDashboardResponse dashboard() {
@@ -24,6 +30,19 @@ public class OwnerController {
     @GetMapping("/properties") 
     public List<PropertyResponse> properties() { 
         return ownerService.properties(email()); 
+    }
+
+    @GetMapping("/reviews")
+    public List<ReviewResponse> reviews() {
+        return reviewService.getOwnerReviews(email());
+    }
+
+    @PutMapping("/reviews/{id}/response")
+    public ReviewResponse respondToReview(
+            @PathVariable Long id,
+            @Valid @RequestBody OwnerReviewResponseRequest request
+    ) {
+        return reviewService.respondToReview(id, request, email());
     }
     
     @PutMapping("/properties/{id}") public PropertyResponse updateProperty(@PathVariable Long id, @Valid @RequestBody OwnerPropertyUpdateRequest request) { return ownerService.updateProperty(id, request, email()); }
