@@ -12,6 +12,7 @@ public record ReviewResponse(
         String userName,
         Integer rating,
         String comment,
+        String ownerResponse,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") LocalDate reviewDate,
         boolean approved
 ) {
