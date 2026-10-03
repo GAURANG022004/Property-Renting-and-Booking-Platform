@@ -22,6 +22,18 @@ public class PropertyImageController {
             @PathVariable Long propertyId,
             @RequestParam("images") List<MultipartFile> images
     ) {
+        return saveImages(propertyId, images, false);
+    }
+
+    @PutMapping("/{propertyId}/images")
+    public List<String> replaceImages(
+            @PathVariable Long propertyId,
+            @RequestParam("images") List<MultipartFile> images
+    ) {
+        return saveImages(propertyId, images, true);
+    }
+
+    private List<String> saveImages(Long propertyId, List<MultipartFile> images, boolean replace) {
         Authentication auth = (Authentication) org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication();
@@ -30,7 +42,8 @@ public class PropertyImageController {
         boolean isAdmin = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        return imageStorageService.uploadPropertyImages(propertyId, images, uploaderEmail, isAdmin);
+        return replace
+                ? imageStorageService.replacePropertyImages(propertyId, images, uploaderEmail, isAdmin)
+                : imageStorageService.uploadPropertyImages(propertyId, images, uploaderEmail, isAdmin);
     }
 }
-
