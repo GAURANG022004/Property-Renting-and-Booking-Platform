@@ -8,6 +8,7 @@
     <a *ngIf="hasRole('TENANT')" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
     <a *ngIf="hasRole('TENANT')" routerLink="/my-bookings" routerLinkActive="active">My Bookings</a>
     <a *ngIf="hasRole('OWNER')" routerLink="/owner" routerLinkActive="active">Owner workspace</a>
+    <a *ngIf="hasRole('OWNER')" routerLink="/owner/reviews" routerLinkActive="active">Guest reviews</a>
     <a *ngIf="hasRole('OWNER')" routerLink="/owner/add-property" routerLinkActive="active">Add Property</a>
     <a *ngIf="hasRole('ADMIN')" routerLink="/admin" routerLinkActive="active">Admin workspace</a>
     <a *ngIf="!tokenService.isLoggedIn()" routerLink="/login" routerLinkActive="active">Login</a>
