@@ -29,6 +29,9 @@ public class Review {
     @Column(nullable = false, length = 2000)
     private String comment;
 
+    @Column(length = 2000)
+    private String ownerResponse;
+
     @Column(nullable = false)
     private LocalDate reviewDate;
 
@@ -70,6 +73,14 @@ public class Review {
 
     public String getComment() {
         return comment;
+    }
+
+    public String getOwnerResponse() {
+        return ownerResponse;
+    }
+
+    public void setOwnerResponse(String ownerResponse) {
+        this.ownerResponse = ownerResponse;
     }
 
     public LocalDate getReviewDate() {
