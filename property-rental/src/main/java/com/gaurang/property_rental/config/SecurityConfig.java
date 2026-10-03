@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         // Public property listing and details
                         .requestMatchers(HttpMethod.GET, "/properties", "/properties/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/reviews/property/**").permitAll()
 
                         // Booking history + booking creation for authenticated users
                         .requestMatchers("/admin/**").hasRole("ADMIN")
