@@ -99,6 +99,15 @@ export class PropertyService {
     return this.http.post<string[]>(`${this.apiBaseUrl}/properties/${propertyId}/images`, formData);
   }
 
+  replacePropertyImages(propertyId: number, files: File[]): Observable<string[]> {
+    const formData = new FormData();
+    files.forEach((f) => formData.append('images', f));
+
+    return this.http.put<string[]>(`${this.apiBaseUrl}/properties/${propertyId}/images`, formData).pipe(
+      map((urls) => urls.map((url) => this.toAbsoluteImageUrl(url)))
+    );
+  }
+
   private toAbsoluteImageUrl(url: string): string {
     if (!url) return url;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
