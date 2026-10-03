@@ -46,21 +46,46 @@ public class ImageStorageService {
             String uploaderEmail,
             boolean isAdmin
     ) {
+        Property property = authorizedProperty(propertyId, uploaderEmail, isAdmin);
+
+        if (images == null || images.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No images provided");
+        }
+
+        return storeImages(property, images);
+    }
+
+    @Transactional
+    public List<String> replacePropertyImages(
+            Long propertyId,
+            List<MultipartFile> images,
+            String uploaderEmail,
+            boolean isAdmin
+    ) {
+        Property property = authorizedProperty(propertyId, uploaderEmail, isAdmin);
+        if (images == null || images.stream().noneMatch(file -> file != null && !file.isEmpty())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No images provided");
+        }
+
+        propertyImageRepository.deleteByPropertyId(propertyId);
+        return storeImages(property, images);
+    }
+
+    private Property authorizedProperty(Long propertyId, String uploaderEmail, boolean isAdmin) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found"));
 
         boolean isOwner = property.getOwner() != null
                 && property.getOwner().getEmail() != null
                 && property.getOwner().getEmail().equalsIgnoreCase(uploaderEmail);
-
         if (!isAdmin && !isOwner) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the property owner (or admin) can upload images");
         }
+        return property;
+    }
 
-        if (images == null || images.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No images provided");
-        }
-
+    private List<String> storeImages(Property property, List<MultipartFile> images) {
+        Long propertyId = property.getId();
         List<String> urls = new ArrayList<>();
 
         for (MultipartFile file : images) {
@@ -94,4 +119,3 @@ public class ImageStorageService {
         return urls;
     }
 }
-
